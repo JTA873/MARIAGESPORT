@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sport & Nutrition - Programme Sèche Intensive</title>
+    <link rel="stylesheet" href="app-style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+
+        <!-- Onboarding -->
+        <div id="onboarding" class="screen">
+            <div class="onboarding-container">
+                <h1>🏋️ Sport & Nutrition</h1>
+                <p class="subtitle">Programme Sèche Intensive - Mode Couple</p>
+                
+                <div class="onboarding-step" id="step1">
+                    <h2>Bienvenue !</h2>
+                    <p>Créons vos profils pour démarrer votre programme personnalisé</p>
+                    <button class="btn btn-primary" onclick="nextStep(2)">Commencer</button>
+                </div>
+
+                <div class="onboarding-step hidden" id="step2">
+                    <h2>Profil 1/2 - Jade</h2>
+                    <form id="profileJadeForm">
+                        <input type="text" id="nameJade" value="Jade" required>
+                        <select id="sexJade" required>
+                            <option value="male">Homme</option>
+                            <option value="female">Femme</option>
+                        </select>
+                        <input type="number" id="heightJade" placeholder="Taille (cm)" value="175" required>
+                        <input type="number" id="weightJade" placeholder="Poids actuel (kg)" value="95" step="0.1" required>
+                        <input type="number" id="targetWeightJade" placeholder="Poids cible (kg)" value="82" step="0.1" required>
+                        <input type="date" id="deadlineJade" value="2026-08-08" required>
+                        <select id="intensityJade" required>
+                            <option value="light">Léger</option>
+                            <option value="moderate">Modéré</option>
+                            <option value="intense" selected>Intense</option>
+                            <option value="extreme">Extrême</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" onclick="saveProfile('jade'); nextStep(3)">Suivant</button>
+                    </form>
+                </div>
+
+                <div class="onboarding-step hidden" id="step3">
+                    <h2>Profil 2/2 - Élodie</h2>
+                    <form id="profileElodieForm">
+                        <input type="text" id="nameElodie" value="Élodie" required>
+                        <select id="sexElodie" required>
+                            <option value="male">Homme</option>
+                            <option value="female" selected>Femme</option>
+                        </select>
+                        <input type="number" id="heightElodie" placeholder="Taille (cm)" value="170" required>
+                        <input type="number" id="weightElodie" placeholder="Poids actuel (kg)" value="87" step="0.1" required>
+                        <input type="number" id="targetWeightElodie" placeholder="Poids cible (kg)" value="72" step="0.1" required>
+                        <input type="date" id="deadlineElodie" value="2026-08-08" required>
+                        <label>
+                            <input type="checkbox" id="postpartumElodie">
+                            Post-partum (adaptations sécuritaires)
+                        </label>
+                        <select id="intensityElodie" required>
+                            <option value="light">Léger</option>
+                            <option value="moderate">Modéré</option>
+                            <option value="intense" selected>Intense mais progressif</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" onclick="saveProfile('elodie'); finishOnboarding()">Terminer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="mainApp" class="screen hidden">
+            <!-- Header avec navigation -->
+            <header class="app-header">
+                <h1>💪 <span id="currentProfileName">Jade</span></h1>
+                <div class="profile-switch">
+                    <button onclick="switchProfile('jade')" id="btnJade" class="active">Jade</button>
+                    <button onclick="switchProfile('elodie')" id="btnElodie">Élodie</button>
+                </div>
+            </header>
+
+            <!-- Navigation tabs -->
+            <nav class="tabs">
+                <button class="tab active" onclick="showTab('today')">🏠 Aujourd'hui</button>
+                <button class="tab" onclick="showTab('planning')">📅 Planning</button>
+                <button class="tab" onclick="showTab('nutrition')">🥗 Nutrition</button>
+                <button class="tab" onclick="showTab('shopping')">🛒 Courses</button>
+                <button class="tab" onclick="showTab('progress')">📊 Progression</button>
+            </nav>
+
+            <!-- Tab Content -->
+            <main class="content">
+                <!-- TODAY TAB -->
+                <div id="tab-today" class="tab-content">
+                    <div class="deadline-banner">
+                        <span>💍 Mariage dans <strong id="daysRemaining">217</strong> jours</span>
+                    </div>
+
+                    <section class="card">
+                        <h2>⚡ Entraînement Aujourd'hui</h2>
+                        <div id="todayWorkout" class="workout-card">
+                            <h3 id="workoutTitle">HIIT Intense - Focus Ventre/Bras</h3>
+                            <div class="workout-meta">
+                                <span>⏱ <span id="workoutDuration">60</span> min</span>
+                                <span>🔥 <span id="workoutIntensity">Intense</span></span>
+                                <span>~<span id="workoutCalories">650</span> kcal</span>
+                            </div>
+                            <div class="workout-exercises" id="workoutExercises">
+                                <!-- Populated by JS -->
+                            </div>
+                            <button class="btn btn-primary btn-large" onclick="startWorkout()">▶ COMMENCER</button>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2>🍽 Nutrition - Jeûne 16/8</h2>
+                        <div class="nutrition-summary">
+                            <div class="fasting-status" id="fastingStatus">
+                                <p>Fenêtre alimentation : <strong>12:00 - 20:00</strong></p>
+                                <p id="fastingTimer">Ouverture dans 3h15</p>
+                            </div>
+                            <div class="macros-today">
+                                <p>Objectif : <strong id="targetCalories">2200</strong> kcal</p>
+                                <div class="macros-grid">
+                                    <span>Protéines: <strong id="targetProtein">190</strong>g</span>
+                                    <span>Glucides: <strong id="targetCarbs">185</strong>g</span>
+                                    <span>Lipides: <strong id="targetFat">78</strong>g</span>
+                                </div>
+                            </div>
+                            <div id="mealsToday" class="meals-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2>📊 Cette Semaine</h2>
+                        <div class="weekly-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Séances</span>
+                                <span class="stat-value" id="weekWorkouts">2/4</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Calories brûlées</span>
+                                <span class="stat-value" id="weekCalories">1250</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Poids</span>
+                                <span class="stat-value" id="currentWeight">94.2 kg</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- PLANNING TAB -->
+                <div id="tab-planning" class="tab-content hidden">
+                    <h2>📅 Planning Semaine 2</h2>
+                    <div class="week-selector">
+                        <button onclick="changeWeek(-1)">◀ Semaine 1</button>
+                        <span>Semaine 2 / 4</span>
+                        <button onclick="changeWeek(1)">Semaine 3 ▶</button>
+                    </div>
+                    <div id="weeklyPlan" class="weekly-plan">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- NUTRITION TAB -->
+                <div id="tab-nutrition" class="tab-content hidden">
+                    <h2>🥗 Plans Nutrition</h2>
+                    <div class="nutrition-controls">
+                        <select id="nutritionDay">
+                            <option>Lundi</option>
+                            <option>Mardi</option>
+                            <option>Mercredi</option>
+                            <option>Jeudi</option>
+                            <option>Vendredi</option>
+                            <option>Samedi</option>
+                            <option>Dimanche</option>
+                        </select>
+                    </div>
+                    <div id="nutritionPlan" class="nutrition-plan">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- SHOPPING TAB -->
+                <div id="tab-shopping" class="tab-content hidden">
+                    <h2>🛒 Liste de Courses</h2>
+                    <div class="shopping-controls">
+                        <button class="btn btn-primary" onclick="generateShoppingList()">Générer pour cette semaine</button>
+                    </div>
+                    <div id="shoppingList" class="shopping-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn btn-secondary" onclick="exportShoppingPDF()">📥 Exporter PDF</button>
+                </div>
+
+                <!-- PROGRESS TAB -->
+                <div id="tab-progress" class="tab-content hidden">
+                    <h2>📊 Progression Couple</h2>
+                    <div class="comparison-grid">
+                        <div class="profile-progress">
+                            <h3>👨 Jade</h3>
+                            <div class="progress-stats">
+                                <p>Séances : <strong id="jadeWorkouts">2/4</strong></p>
+                                <p>Calories : <strong id="jadeCalories">1250</strong> kcal</p>
+                                <p>Poids : <strong id="jadeWeight">94.2</strong> kg (<span id="jadeChange">-0.8</span> kg)</p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="jadeProgress" style="width: 50%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-progress">
+                            <h3>👩 Élodie</h3>
+                            <div class="progress-stats">
+                                <p>Séances : <strong id="elodieWorkouts">3/4</strong></p>
+                                <p>Calories : <strong id="elodieCalories">890</strong> kcal</p>
+                                <p>Poids : <strong id="elodieWeight">86.1</strong> kg (<span id="elodieChange">-0.9</span> kg)</p>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="elodieProgress" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🏆 Objectif Commun</h3>
+                        <p>Mariage 08/08/2026 - J-217</p>
+                        <p>Perte combinée : <strong>1.7 kg</strong> / 26 kg</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 6.5%"></div>
+                        </div>
+                        <p class="progress-percent">6.5%</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>⚖️ Logger Poids</h3>
+                        <div class="weight-logger">
+                            <input type="number" id="newWeight" step="0.1" placeholder="Poids (kg)">
+                            <input type="date" id="weightDate" value="">
+                            <button class="btn btn-primary" onclick="logWeight()">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Workout Session Screen -->
+        <div id="workoutSession" class="screen hidden">
+            <div class="session-header">
+                <button class="btn-back" onclick="exitWorkout()">← Retour</button>
+                <h2 id="sessionTitle">HIIT Intense</h2>
+            </div>
+            <div class="session-content">
+                <div class="timer-display">
+                    <div class="timer-circle">
+                        <span id="timerDisplay">00:00</span>
+                    </div>
+                    <p id="currentExercise">Rameur 500m</p>
+                    <div id="exerciseDetail">
+                        <p>Effort 8/10</p>
+                    </div>
+                </div>
+                <div class="session-controls">
+                    <button class="btn btn-primary btn-large" id="timerBtn" onclick="toggleTimer()">▶ DÉMARRER</button>
+                    <button class="btn btn-secondary" onclick="skipExercise()">⏭ Suivant</button>
+                </div>
+                <div class="session-stats">
+                    <span>Exercice <span id="exerciseIndex">1</span>/<span id="totalExercises">8</span></span>
+                    <span>Calories: ~<span id="sessionCalories">0</span> kcal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app-script.js"></script>
+</body>
+</html>
