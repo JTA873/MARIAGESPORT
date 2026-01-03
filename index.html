@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
     <title>Sport & Nutrition - Programme Sèche Intensive</title>
     <link rel="stylesheet" href="app-style.css">
 </head>
@@ -17,16 +20,7 @@
         <!-- Onboarding -->
         <div id="onboarding" class="screen">
             <div class="onboarding-container">
-                <h1>🏋️ Sport & Nutrition</h1>
-                <p class="subtitle">Programme Sèche Intensive - Mode Couple</p>
-                
-                <div class="onboarding-step" id="step1">
-                    <h2>Bienvenue !</h2>
-                    <p>Créons vos profils pour démarrer votre programme personnalisé</p>
-                    <button class="btn btn-primary" onclick="nextStep(2)">Commencer</button>
-                </div>
-
-                <div class="onboarding-step hidden" id="step2">
+                <div class="onboarding-step" id="step2">
                     <h2>Profil 1/2 - Jade</h2>
                     <form id="profileJadeForm">
                         <input type="text" id="nameJade" value="Jade" required>
@@ -90,9 +84,10 @@
             <nav class="tabs">
                 <button class="tab active" onclick="showTab('today')">🏠 Aujourd'hui</button>
                 <button class="tab" onclick="showTab('planning')">📅 Planning</button>
-                <button class="tab" onclick="showTab('nutrition')">🥗 Nutrition</button>
+                <button class="tab" onclick="showTab('workouts')">💪 Exercices</button>
+                <button class="tab" onclick="showTab('recipes')">🍽️ Recettes</button>
                 <button class="tab" onclick="showTab('shopping')">🛒 Courses</button>
-                <button class="tab" onclick="showTab('progress')">📊 Progression</button>
+                <button class="tab" onclick="showTab('progress')">📊 Stats</button>
             </nav>
 
             <!-- Tab Content -->
@@ -101,6 +96,21 @@
                 <div id="tab-today" class="tab-content">
                     <div class="deadline-banner">
                         <span>💍 Mariage dans <strong id="daysRemaining">217</strong> jours</span>
+                    </div>
+
+                    <!-- Day Navigation -->
+                    <div class="day-navigation">
+                        <button class="btn-nav-day" onclick="navigateDay(-1)">◀ Jour Précédent</button>
+                        <div class="current-day-display">
+                            <h3 id="currentDayDisplay">Vendredi 03 Janvier 2026</h3>
+                            <p id="currentDayInfo">Jour 1 - Semaine 1</p>
+                        </div>
+                        <button class="btn-nav-day" onclick="navigateDay(1)">Jour Suivant ▶</button>
+                    </div>
+
+                    <!-- Phase Info Banner -->
+                    <div id="phaseInfoBanner" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                        <!-- Populated by JS -->
                     </div>
 
                     <section class="card">
@@ -115,7 +125,20 @@
                             <div class="workout-exercises" id="workoutExercises">
                                 <!-- Populated by JS -->
                             </div>
-                            <button class="btn btn-primary btn-large" onclick="startWorkout()">▶ COMMENCER</button>
+                            <div class="workout-controls">
+                                <select id="workoutSelect" class="workout-select" onchange="changeWorkoutFromSelect()">
+                                    <option value="hiit">HIIT Full Body (650 kcal)</option>
+                                    <option value="strength">Force & Résistance (540 kcal)</option>
+                                    <option value="cardio">Cardio Intensif (720 kcal)</option>
+                                    <option value="flexibility">Souplesse Active (280 kcal)</option>
+                                    <option value="yoga">Yoga Flow (350 kcal)</option>
+                                    <option value="homestrength">Force Maison (320 kcal)</option>
+                                    <option value="homecardio">Cardio Maison (400 kcal)</option>
+                                    <option value="pilates">Pilates Core (220 kcal)</option>
+                                    <option value="stretching">Stretching Profond (120 kcal)</option>
+                                </select>
+                                <button class="btn btn-primary btn-large" onclick="startWorkout()">▶ COMMENCER</button>
+                            </div>
                         </div>
                     </section>
 
@@ -132,6 +155,15 @@
                                     <span>Protéines: <strong id="targetProtein">190</strong>g</span>
                                     <span>Glucides: <strong id="targetCarbs">185</strong>g</span>
                                     <span>Lipides: <strong id="targetFat">78</strong>g</span>
+                                </div>
+                            </div>
+                            <div class="macros-consumed">
+                                <p><strong>📊 Consommation du jour:</strong></p>
+                                <div class="macros-grid consumed">
+                                    <span>✅ <strong id="consumedCalories">0</strong> kcal</span>
+                                    <span>P: <strong id="consumedProtein">0</strong>g</span>
+                                    <span>C: <strong id="consumedCarbs">0</strong>g</span>
+                                    <span>L: <strong id="consumedFat">0</strong>g</span>
                                 </div>
                             </div>
                             <div id="mealsToday" class="meals-list">
@@ -161,32 +193,65 @@
 
                 <!-- PLANNING TAB -->
                 <div id="tab-planning" class="tab-content hidden">
-                    <h2>📅 Planning Semaine 2</h2>
-                    <div class="week-selector">
-                        <button onclick="changeWeek(-1)">◀ Semaine 1</button>
-                        <span>Semaine 2 / 4</span>
-                        <button onclick="changeWeek(1)">Semaine 3 ▶</button>
+                    <h2>📅 Planning Semaine <span id="weekNumber">2</span></h2>
+                    <div class="planning-controls" style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                        <select id="planningPhaseFilter" onchange="loadWeeklyPlan()">
+                            <option value="current">Phase actuelle</option>
+                            <option value="1">Phase 1 - Agressive</option>
+                            <option value="2">Phase 2 - Normale</option>
+                        </select>
+                        <div class="week-selector">
+                            <button onclick="changeWeek(-1)">◀ Précédent</button>
+                            <span>Semaine <span id="weekNumberDisplay">2</span> / <span id="totalWeeksInPhase">4</span></span>
+                            <button onclick="changeWeek(1)">Suivant ▶</button>
+                        </div>
                     </div>
                     <div id="weeklyPlan" class="weekly-plan">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
-                <!-- NUTRITION TAB -->
-                <div id="tab-nutrition" class="tab-content hidden">
-                    <h2>🥗 Plans Nutrition</h2>
-                    <div class="nutrition-controls">
-                        <select id="nutritionDay">
-                            <option>Lundi</option>
-                            <option>Mardi</option>
-                            <option>Mercredi</option>
-                            <option>Jeudi</option>
-                            <option>Vendredi</option>
-                            <option>Samedi</option>
-                            <option>Dimanche</option>
+                <!-- WORKOUTS LIBRARY TAB -->
+                <div id="tab-workouts" class="tab-content hidden">
+                    <h2>💪 Bibliothèque d'Exercices</h2>
+                    <div class="filter-bar">
+                        <select id="workoutFilter" onchange="filterWorkouts()">
+                            <option value="all">Tous les types</option>
+                            <option value="hiit">HIIT</option>
+                            <option value="strength">Force</option>
+                            <option value="cardio">Cardio</option>
                         </select>
+                        <input type="text" id="workoutSearch" placeholder="🔍 Rechercher un exercice..." oninput="filterWorkouts()">
                     </div>
-                    <div id="nutritionPlan" class="nutrition-plan">
+                    <div id="workoutsList" class="workouts-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- RECIPES LIBRARY TAB -->
+                <div id="tab-recipes" class="tab-content hidden">
+                    <h2>🍽️ Bibliothèque de Recettes</h2>
+                    <div class="filter-bar">
+                        <select id="recipePhaseFilter" onchange="filterRecipes()">
+                            <option value="all">Toutes les phases</option>
+                            <option value="1">Phase 1 - Agressive</option>
+                            <option value="2">Phase 2 - Normale</option>
+                        </select>
+                        <select id="recipeWeekFilter" onchange="filterRecipes()">
+                            <option value="current">Semaine en cours</option>
+                            <option value="all">Toutes les recettes</option>
+                        </select>
+                        <select id="recipeFilter" onchange="filterRecipes()">
+                            <option value="all">Tous les repas</option>
+                            <option value="breakfast">Petit-déjeuner</option>
+                            <option value="lunch">Déjeuner</option>
+                            <option value="snack">Collation</option>
+                            <option value="dinner">Dîner</option>
+                        </select>
+                        <input type="text" id="recipeSearch" placeholder="🔍 Rechercher une recette..." oninput="filterRecipes()">
+                        <button class="btn btn-primary" onclick="showAddMealDialog()">+ Ajouter aujourd'hui</button>
+                    </div>
+                    <div id="recipesList" class="recipes-grid">
                         <!-- Populated by JS -->
                     </div>
                 </div>
@@ -194,13 +259,24 @@
                 <!-- SHOPPING TAB -->
                 <div id="tab-shopping" class="tab-content hidden">
                     <h2>🛒 Liste de Courses</h2>
-                    <div class="shopping-controls">
-                        <button class="btn btn-primary" onclick="generateShoppingList()">Générer pour cette semaine</button>
+                    <div class="shopping-controls" style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div>
+                            <label for="shoppingWeeksSelect" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--primary); margin-bottom: 5px;">📅 Courses pour :</label>
+                            <select id="shoppingWeeksSelect" style="padding: 8px 12px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 0.95rem; cursor: pointer;">
+                                <option value="1">1 semaine</option>
+                                <option value="2">2 semaines</option>
+                                <option value="3">3 semaines</option>
+                                <option value="4">4 semaines</option>
+                                <option value="6">6 semaines</option>
+                                <option value="8">8 semaines</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateShoppingList()">🔄 Générer la liste</button>
                     </div>
                     <div id="shoppingList" class="shopping-list">
                         <!-- Populated by JS -->
                     </div>
-                    <button class="btn btn-secondary" onclick="exportShoppingPDF()">📥 Exporter PDF</button>
+                    <button class="btn btn-secondary" onclick="exportShoppingPDF()">📄 Exporter PDF</button>
                 </div>
 
                 <!-- PROGRESS TAB -->
@@ -254,28 +330,70 @@
         </div>
 
         <!-- Workout Session Screen -->
-        <div id="workoutSession" class="screen hidden">
-            <div class="session-header">
-                <button class="btn-back" onclick="exitWorkout()">← Retour</button>
-                <h2 id="sessionTitle">HIIT Intense</h2>
+        <!-- Exercise Detail Modal -->
+        <div id="exerciseModal" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeExerciseModal()">×</button>
+                <h2 id="modalExerciseName"></h2>
+                <div id="modalExerciseContent"></div>
+                <button class="btn btn-primary" onclick="startWorkoutFromModal()">Commencer cet entraînement</button>
             </div>
-            <div class="session-content">
-                <div class="timer-display">
-                    <div class="timer-circle">
-                        <span id="timerDisplay">00:00</span>
-                    </div>
-                    <p id="currentExercise">Rameur 500m</p>
-                    <div id="exerciseDetail">
-                        <p>Effort 8/10</p>
-                    </div>
+        </div>
+
+        <!-- Recipe Detail Modal -->
+        <div id="recipeModal" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeRecipeModal()">×</button>
+                <h2 id="modalRecipeName"></h2>
+                <div id="modalRecipeContent"></div>
+                <button class="btn btn-primary" onclick="addRecipeToToday()">Ajouter à aujourd'hui</button>
+            </div>
+        </div>
+
+        <!-- Add Meal Dialog -->
+        <div id="addMealDialog" class="modal hidden">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeAddMealDialog()">×</button>
+                <h2>Ajouter un repas</h2>
+                <p>Sélectionnez un repas dans la bibliothèque de recettes</p>
+                <button class="btn btn-secondary" onclick="closeAddMealDialog(); showTab('recipes')">Voir les recettes</button>
+            </div>
+        </div>
+
+        <!-- Day Detail Modal -->
+        <div id="dayDetailModal" class="modal hidden">
+            <div class="modal-content" style="max-width: 800px;">
+                <button class="modal-close" onclick="closeDayDetailModal()">×</button>
+                <h2 id="dayDetailTitle"></h2>
+                <div id="dayDetailContent"></div>
+            </div>
+        </div>
+
+        <!-- Workout Session Modal -->
+        <div id="workoutSession" class="modal hidden">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="session-header">
+                    <button class="modal-close" onclick="exitWorkout()">×</button>
+                    <h2 id="sessionTitle">HIIT Intense</h2>
                 </div>
-                <div class="session-controls">
-                    <button class="btn btn-primary btn-large" id="timerBtn" onclick="toggleTimer()">▶ DÉMARRER</button>
-                    <button class="btn btn-secondary" onclick="skipExercise()">⏭ Suivant</button>
-                </div>
-                <div class="session-stats">
-                    <span>Exercice <span id="exerciseIndex">1</span>/<span id="totalExercises">8</span></span>
-                    <span>Calories: ~<span id="sessionCalories">0</span> kcal</span>
+                <div class="session-content">
+                    <div class="timer-display">
+                        <div class="timer-circle">
+                            <span id="timerDisplay">00:00</span>
+                        </div>
+                        <p id="currentExercise">Rameur 500m</p>
+                        <div id="exerciseDetail">
+                            <p>Effort 8/10</p>
+                        </div>
+                    </div>
+                    <div class="session-controls">
+                        <button class="btn btn-primary btn-large" id="timerBtn" onclick="toggleTimer()">▶ DÉMARRER</button>
+                        <button class="btn btn-secondary" onclick="skipExercise()">⏭ Suivant</button>
+                    </div>
+                    <div class="session-stats">
+                        <span>Exercice <span id="exerciseIndex">1</span>/<span id="totalExercises">8</span></span>
+                        <span>Calories: ~<span id="sessionCalories">0</span> kcal</span>
+                    </div>
                 </div>
             </div>
         </div>
